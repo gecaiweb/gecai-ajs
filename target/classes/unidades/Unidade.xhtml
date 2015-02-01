@@ -1,0 +1,107 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Cadastro e Manutenção de Unidades</ui:define>
+
+	<ui:define name="corpo">
+		<f:metadata>
+	        <f:viewAction action="#{unidadeBean.consultar}" />
+	    </f:metadata>
+	
+		<h:form id="frmUnidade">
+			<h1>Cadastro e Manutenção de Unidades</h1>
+
+			<p:messages id="messages" closable="true"/>
+			
+			<p:toolbar style="margin-top: 20px" id="toolbar">
+				<p:toolbarGroup>
+					
+					<p:commandButton value="Inserir" icon="ui-icon-document" oncomplete="PF('edicaoUnidadeDialog').show()"
+						action="#{unidadeBean.prepararNovoCadastro()}" process="@this" update="unidade-dialog">
+						<p:resetInput target="unidade-dialog" />
+					</p:commandButton>
+					<p:separator/>
+                    
+                    <p:commandButton icon="ui-icon-pencil" title="Editar" disabled="#{unidadeBean.unidadeSelecionada == null}"
+                    	process="@this" update="unidade-dialog" oncomplete="PF('edicaoUnidadeDialog').show()">
+                    	<p:resetInput target="unidade-dialog" />
+                    	<f:setPropertyActionListener value="#{unidadeBean.unidadeSelecionada}" target="#{unidadeBean.unidade}" />	
+                    </p:commandButton>	
+                    
+                    <p:commandButton icon="ui-icon-trash" title="Excluir" disabled="#{unidadeBean.unidadeSelecionada == null}" 
+                    	process="@this" update="tblUnidade messages toolbar" action="#{unidadeBean.excluir()}">
+                    	<p:confirm icon="ui-icon-aler" header="Confirmação de exclusão" 
+                    		message="Tem certeza que deseja excluir a unidade selecionada?"/>
+                    </p:commandButton>	
+                      
+                    <p:commandButton icon="ui-icon-arrowthick-1-s" title="Exportar para XLS" ajax="false" immediate="true">
+                    	<p:dataExporter type="xls" target="tblUnidade" fileName="lista-lotações" />
+                    </p:commandButton>
+					
+				</p:toolbarGroup>
+			</p:toolbar>
+
+			<p:dataTable id="tblUnidade" style="margin-top: 5px" emptyMessage="Nenhuma lotação encontrada." rows="20"
+				paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				value="#{unidadeBean.unidadesFiltradas}" var="unidade" selection="#{unidadeBean.unidadeSelecionada}" 
+				selectionMode="single" rowKey="#{unidade.codigo}">
+			
+				<p:ajax event="rowSelect" update=":frmUnidade:toolbar" />
+  			    <p:ajax event="rowUnselect" update=":frmUnidade:toolbar" />
+				
+		        <f:facet name="header">
+		            Lista de Lotações cadastradas
+		        </f:facet>
+		        
+				<p:column headerText="Código" width="100" sortBy="#{unidade.codigo}">
+					<p:outputLabel value="#{unidade.codigo}"/>
+				</p:column>
+				
+				<p:column headerText="Nome" sortBy="#{unidade.nome}">
+					<p:outputLabel value="#{unidade.nome}"/>
+				</p:column>
+				
+				<p:column headerText="Nome Reduzido" width="100" sortBy="#{unidade.nomeReduzido}">
+					<p:outputLabel value="#{unidade.nomeReduzido}"/>
+				</p:column>
+
+			</p:dataTable>
+
+			<p:dialog header="Nova lotação" widgetVar="edicaoUnidadeDialog"	id="unidade-dialog" resizable="false" 
+				modal="true" closeOnEscape="true">
+				<p:defaultCommand target="salvar-button" scope="unidade-dialog" />
+				
+				<p:messages id="msgs" />
+				
+				<p:panelGrid columns="2" id="painel-dialog" columnClasses="rotulo, campo" style="width: 100%; margin-top: 5px">
+				
+					<p:outputLabel value="Código" for="codigo"/>
+					<p:inputText id="codigo" size="15" readonly="true" value="#{unidadeBean.unidade.codigo}"/>
+
+					<p:outputLabel value="Nome" for="nomeUnidade"/>
+					<p:inputText id="nomeUnidade" size="60" maxlength="120"  value="#{unidadeBean.unidade.nome}"/>
+
+					<p:outputLabel value="Nome Reduzido" for="nomeReduzido"/>
+					<p:inputText id="nomeReduzido" size="15" value="#{unidadeBean.unidade.nomeReduzido}"/>
+						
+				</p:panelGrid>
+				
+				<p:separator/>
+				<h:panelGrid id="pnlBotoes" columns="1">
+					<h:panelGroup>
+						<p:commandButton value="Salvar" icon="ui-icon-disk" id="salvar-button" process="unidade-dialog" action="#{unidadeBean.salvar()}"
+							update="msgs painel-dialog" oncomplete="if (!args.validationFailed) PF('edicaoUnidadeDialog').hide()"/>
+						<p:spacer/>
+						<p:spacer/>		
+						<p:commandButton value="Fechar" icon="ui-icon-close" onclick="PF('edicaoUnidadeDialog').hide()"/>
+					</h:panelGroup>
+				</h:panelGrid>
+			</p:dialog>
+			
+		</h:form>
+	</ui:define>
+</ui:composition>

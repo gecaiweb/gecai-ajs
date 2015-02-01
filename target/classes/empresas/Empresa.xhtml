@@ -1,0 +1,173 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Cadastro e Manutenção da Empresa</ui:define>
+
+	<ui:define name="corpo">
+		<f:metadata>
+	        <f:viewAction action="#{empresaBean.consultar}" />
+	    </f:metadata>
+	
+		<h:form id="frmEmpresa">
+			<h1>Cadastro e Manutenção da Empresa</h1>
+
+			<p:messages id="messages" closable="true"/>
+			
+			<p:toolbar style="margin-top: 20px" id="toolbar">
+				<p:toolbarGroup>
+					
+					<p:commandButton value="Inserir" icon="ui-icon-document" oncomplete="PF('edicaoEmpresaDialog').show()"
+						action="#{empresaBean.prepararNovoCadastro()}" process="@this" update="empresa-dialog">
+						<p:resetInput target="empresa-dialog" />
+					</p:commandButton>
+					<p:separator/>
+                    
+                    <p:commandButton icon="ui-icon-pencil" title="Editar" disabled="#{empresaBean.empresaSelecionada == null}"
+                    	process="@this" update="empresa-dialog" oncomplete="PF('edicaoEmpresaDialog').show()">
+                    	<p:resetInput target="empresa-dialog" />
+                    	<f:setPropertyActionListener value="#{empresaBean.empresaSelecionada}" target="#{empresaBean.empresa}" />	
+                    </p:commandButton>	
+                    
+                    <p:commandButton icon="ui-icon-trash" title="Excluir" disabled="#{empresaBean.empresaSelecionada == null}" 
+                    	process="@this" update="tblEmpresa messages toolbar" action="#{empresaBean.excluir()}">
+                    	<p:confirm icon="ui-icon-aler" header="Confirmação de exclusão" 
+                    		message="Tem certeza que deseja excluir a empresa?"/>
+                    </p:commandButton>	
+                      
+                    <p:commandButton icon="ui-icon-arrowthick-1-s" title="Exportar para XLS" ajax="false" immediate="true">
+                    	<p:dataExporter type="xls" target="tblEmpresa" fileName="lista-lotações" />
+                    </p:commandButton>
+					
+				</p:toolbarGroup>
+			</p:toolbar>
+
+			<p:dataTable id="tblEmpresa" style="margin-top: 5px" emptyMessage="Nenhuma empresa encontrada." rows="20"
+				paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				value="#{empresaBean.empresasFiltradas}" var="empresa" selection="#{empresaBean.empresaSelecionada}" 
+				selectionMode="single" rowKey="#{empresa.codigo}">
+			
+				<p:ajax event="rowSelect" update=":frmEmpresa:toolbar" />
+  			    <p:ajax event="rowUnselect" update=":frmEmpresa:toolbar" />
+				
+		        <f:facet name="header">
+		            Lista de Empresas cadastradas
+		        </f:facet>
+		        
+				<p:column headerText="Código" width="100" sortBy="#{empresa.codigo}">
+					<p:outputLabel value="#{empresa.codigo}"/>
+				</p:column>
+				
+				<p:column headerText="Nome" sortBy="#{empresa.nome}">
+					<p:outputLabel value="#{empresa.nome}"/>
+				</p:column>
+
+				<p:column headerText="Nome Fantasia" width="200" sortBy="#{empresa.nomeFantasia}">
+					<p:outputLabel value="#{empresa.nomeFantasia}"/>
+				</p:column>
+				
+				<p:column headerText="Status" width="100" sortBy="#{empresa.status.descricao}">
+					<p:outputLabel value="#{empresa.status.descricao}"/>
+				</p:column>				
+
+			</p:dataTable>
+
+			<p:dialog header="Nova Empresa" widgetVar="edicaoEmpresaDialog"	id="empresa-dialog" resizable="false" 
+				modal="true" closeOnEscape="true">
+				<p:defaultCommand target="salvar-button" scope="empresa-dialog" />
+				
+				<p:messages id="msgs" />
+				
+				<p:panelGrid columns="4" id="painel-dialog" style="width: 100%; margin-top: 5px" columnClasses="rotulo, campo, rotulo, campo">
+					<p:outputLabel value="Código" for="codigo"/>
+					<p:inputText id="codigo" size="15" readonly="true"  value="#{empresaBean.empresa.codigo}"/>
+
+					<p:outputLabel value="Tipo Pessoa" for="tipoPessoa"/>
+						<p:selectOneButton value="#{empresaBean.empresa.tipoPessoa}" id="tipoPessoa">
+						<f:selectItems value="#{empresaBean.tiposPessoa}" var="tip" itemLabel="#{tip.descricao}" itemValue="#{tip}"/>
+					</p:selectOneButton>
+					
+					<p:outputLabel value="Nome" for="nome"/>
+					<p:inputText id="nome" size="50" maxlength="70" value="#{empresaBean.empresa.nome}" required="true"/>
+					
+					
+					<p:outputLabel value="Nome Fantasia" for="nomeFantasia"/>
+					<p:inputText id="nomeFantasia" size="50" maxlength="70" value="#{empresaBean.empresa.nomeFantasia}"/>
+					
+					<p:outputLabel value="Cpf" for="cpf"/>
+					<p:inputText id="cpf" size="20" maxlength="20" value="#{empresaBean.empresa.documentoReceitaFederal}"/>
+					
+					<p:outputLabel value="Registro Geral" for="registroGeral"/>
+					<p:inputText id="registroGeral" size="20" maxlength="20" value="#{empresaBean.empresa.registroEstadual}"/>
+					
+					<p:outputLabel value="Status" for="status"/>
+                	<p:selectOneMenu id="status" value="#{empresaBean.empresa.status}" style="width:180px">
+						<f:selectItem itemLabel="Selecione o status"/>
+						<f:selectItems value="#{empresaBean.statuss}"
+							var="stat" itemLabel="#{stat.descricao}" itemValue="#{stat}"/>
+					</p:selectOneMenu>
+					
+					<p:spacer/>
+					<p:spacer/>
+						
+				</p:panelGrid>
+				
+				<p:fieldset legend="Endereço" toggleable="true" style="margin-top: 20px">
+					<h:panelGroup>
+						<p:panelGrid columns="4" id="pnlEndereco" style="width: 100%; margin-top: 20px" columnClasses="rotulo, campo, rotulo, campo">
+							<p:outputLabel value="Cep" for="cep"/>
+							<h:panelGroup>
+									<p:inputMask mask="99999-999" id="cep" size="10" maxlength="9" value="#{empresaBean.empresa.endereco.cep}"/>
+									<p:spacer/><p:spacer/>
+									<p:button icon="ui-icon-search" title="Buscar CEP"/>
+							</h:panelGroup>
+	
+							<p:spacer/>
+							<p:spacer/>
+	
+							<p:outputLabel value="Logradouro" for="logradouro"/>
+							<p:inputText id="logradouro" size="60" maxlength="100" value="#{empresaBean.empresa.endereco.logradouro}"/>
+							
+							<p:outputLabel value="Número" for="numero"/>
+							<p:inputText id="numero" size="20" maxlength="10" value="#{empresaBean.empresa.endereco.numero}"/>
+	
+							<p:outputLabel value="Complemento" for="complemento"/>
+							<p:inputText id="complemento" size="60" maxlength="10" value="#{empresaBean.empresa.endereco.complemento}"/>
+													
+							<p:outputLabel value="Bairro" for="bairro"/>
+							<p:inputText id="bairro" size="60" maxlength="10" value="#{empresaBean.empresa.endereco.bairro}"/>
+							
+							<p:outputLabel value="País" for="pais"/>
+							<p:inputText id="pais" size="20" maxlength="10" value="#{empresaBean.empresa.endereco.pais}"/>
+							
+							<p:outputLabel value="UF" for="uf"/>
+							<p:inputText id="uf" size="20" maxlength="2" value="#{empresaBean.empresa.endereco.estado}"/>
+													
+							<p:outputLabel value="Município" for="municipio"/>
+							<p:inputText id="municipio" size="40" maxlength="10" value="#{empresaBean.empresa.endereco.cidade}"/>
+							
+							<p:outputLabel value="Telefone" for="telefone"/>
+							<p:inputText id="telefone" size="40" maxlength="10"/>						
+						
+						</p:panelGrid>
+					</h:panelGroup>
+				</p:fieldset>
+								
+				<p:separator/>
+				<h:panelGrid id="pnlBotoes" columns="1">
+					<h:panelGroup>
+						<p:commandButton value="Salvar" icon="ui-icon-disk" id="salvar-button" process="empresa-dialog" action="#{empresaBean.salvar()}"
+							update="msgs painel-dialog" oncomplete="if (!args.validationFailed) PF('edicaoEmpresaDialog').hide()"/>
+						<p:spacer/>
+						<p:spacer/>		
+						<p:commandButton value="Fechar" icon="ui-icon-close" onclick="PF('edicaoEmpresaDialog').hide()"/>
+					</h:panelGroup>
+				</h:panelGrid>
+			</p:dialog>
+			
+		</h:form>
+	</ui:define>
+</ui:composition>

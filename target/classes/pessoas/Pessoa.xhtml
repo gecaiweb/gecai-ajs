@@ -1,0 +1,122 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Cadastro e Manutenção de Lotações</ui:define>
+
+	<ui:define name="corpo">
+		<f:metadata>
+	        <f:viewAction action="#{pessoaBean.consultar}" />
+	    </f:metadata>
+	
+		<h:form id="frmPessoa">
+			<h1>Cadastro e Manutenção de Lotações</h1>
+
+			<p:messages id="messages" closable="true"/>
+			
+			<p:toolbar style="margin-top: 20px" id="toolbar">
+				<p:toolbarGroup>
+					
+					<p:commandButton value="Inserir" icon="ui-icon-document" oncomplete="PF('edicaoPessoaDialog').show()"
+						action="#{pessoaBean.prepararNovoCadastro()}" process="@this" update="pessoa-dialog">
+						<p:resetInput target="pessoa-dialog" />
+					</p:commandButton>
+					<p:separator/>
+                    
+                    <p:commandButton icon="ui-icon-pencil" title="Editar" disabled="#{pessoaBean.pessoaSelecionada == null}"
+                    	process="@this" update="pessoa-dialog" oncomplete="PF('edicaoPessoaDialog').show()">
+                    	<p:resetInput target="pessoa-dialog" />
+                    	<f:setPropertyActionListener value="#{pessoaBean.pessoaSelecionada}" target="#{pessoaBean.pessoa}" />	
+                    </p:commandButton>	
+                    
+                    <p:commandButton icon="ui-icon-trash" title="Excluir" disabled="#{pessoaBean.pessoaSelecionada == null}" 
+                    	process="@this" update="tblPessoa messages toolbar" action="#{pessoaBean.excluir()}">
+                    	<p:confirm icon="ui-icon-aler" header="Confirmação de exclusão" 
+                    		message="Tem certeza que deseja excluir a pessoa?"/>
+                    </p:commandButton>	
+                      
+                    <p:commandButton icon="ui-icon-arrowthick-1-s" title="Exportar para XLS" ajax="false" immediate="true">
+                    	<p:dataExporter type="xls" target="tblPessoa" fileName="lista-lotações" />
+                    </p:commandButton>
+					
+				</p:toolbarGroup>
+			</p:toolbar>
+
+			<p:dataTable id="tblPessoa" style="margin-top: 5px" emptyMessage="Nenhuma pessoa encontrada." rows="20"
+				paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				value="#{pessoaBean.pessoasFiltradas}" var="pessoa" selection="#{pessoaBean.pessoaSelecionada}" 
+				selectionMode="single" rowKey="#{pessoa.codigo}">
+			
+				<p:ajax event="rowSelect" update=":frmPessoa:toolbar" />
+  			    <p:ajax event="rowUnselect" update=":frmPessoa:toolbar" />
+				
+		        <f:facet name="header">
+		            Lista de Pessoas cadastradas
+		        </f:facet>
+		        
+				<p:column headerText="Código" width="100" sortBy="#{pessoa.codigo}">
+					<p:outputLabel value="#{pessoa.codigo}"/>
+				</p:column>
+				
+				<p:column headerText="Pessoas" sortBy="#{pessoa.nome}">
+					<p:outputLabel value="#{pessoa.nome}"/>
+				</p:column>
+				
+				<p:column headerText="Status" width="100" sortBy="#{pessoa.status.descricao}">
+					<p:outputLabel value="#{pessoa.status.descricao}"/>
+				</p:column>				
+
+			</p:dataTable>
+
+			<p:dialog header="Nova Pessoa" widgetVar="edicaoPessoaDialog"	id="pessoa-dialog" resizable="false" 
+				modal="true" closeOnEscape="true">
+				<p:defaultCommand target="salvar-button" scope="pessoa-dialog" />
+				
+				<p:messages id="msgs" />
+				
+			<p:panelGrid columns="2" id="painel-dialog" style="width: 100%; margin-top: 20px" columnClasses="rotulo, campo">
+				
+				<h:outputText value="Tipo Pessoa"/>
+				<p:selectOneButton value="#{pessoaBean.pessoa.tipoPessoa}">
+					<f:selectItems value="#{pessoaBean.tiposPessoa}" var="tip" itemLabel="#{tip.descricao}" itemValue="#{tip}"/>
+				</p:selectOneButton>
+				
+				<p:spacer/>
+				<p:spacer/>
+				
+				<p:outputLabel value="Nome" for="nome"/>
+				<p:inputText id="nome" size="50" maxlength="70" value="#{pessoaBean.pessoa.nome}"/>
+				
+				<p:outputLabel value="Cpf" for="cpf"/>
+				<p:inputText id="cpf" size="20" maxlength="20" value="#{pessoaBean.pessoa.documentoReceitaFederal}"/>
+				
+				<p:outputLabel value="Registro Geral" for="registroGeral"/>
+				<p:inputText id="registroGeral" size="20" maxlength="20" value="#{pessoaBean.pessoa.registroEstadual}"/>
+				
+				<p:outputLabel value="Status" for="status"/>
+                <p:selectOneMenu id="status" value="#{pessoaBean.pessoa.status}" style="width:180px">
+					<f:selectItem itemLabel="Selecione o status"/>
+					<f:selectItems value="#{pessoaBean.statuss}"
+						var="stat" itemLabel="#{stat.descricao}" itemValue="#{stat}"/>
+				</p:selectOneMenu>
+		
+			</p:panelGrid>
+				
+				<p:separator/>
+				<h:panelGrid id="pnlBotoes" columns="1">
+					<h:panelGroup>
+						<p:commandButton value="Salvar" icon="ui-icon-disk" id="salvar-button" process="pessoa-dialog" action="#{pessoaBean.salvar()}"
+							update="msgs painel-dialog" oncomplete="if (!args.validationFailed) PF('edicaoPessoaDialog').hide()"/>
+						<p:spacer/>
+						<p:spacer/>		
+						<p:commandButton value="Fechar" icon="ui-icon-close" onclick="PF('edicaoPessoaDialog').hide()"/>
+					</h:panelGroup>
+				</h:panelGrid>
+			</p:dialog>
+			
+		</h:form>
+	</ui:define>
+</ui:composition>

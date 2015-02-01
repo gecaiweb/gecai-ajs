@@ -1,0 +1,107 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Cadastro e Manutenção de Centros de Custo</ui:define>
+
+	<ui:define name="corpo">
+		<f:metadata>
+	        <f:viewAction action="#{centroDeCustoBean.consultar}" />
+	    </f:metadata>
+	
+		<h:form id="frmCentroDeCusto">
+			<h1>Cadastro e Manutenção de Centros de Custo</h1>
+
+			<p:messages id="messages" closable="true"/>
+			
+			<p:toolbar style="margin-top: 20px" id="toolbar">
+				<p:toolbarGroup>
+					
+					<p:commandButton value="Inserir" icon="ui-icon-document" oncomplete="PF('edicaoCentroDeCustoDialog').show()"
+						action="#{centroDeCustoBean.prepararNovoCadastro()}" process="@this" update="centroDeCusto-dialog">
+						<p:resetInput target="centroDeCusto-dialog" />
+					</p:commandButton>
+					<p:separator/>
+                    
+                    <p:commandButton icon="ui-icon-pencil" title="Editar" disabled="#{centroDeCustoBean.centroDeCustoSelecionado == null}"
+                    	process="@this" update="centroDeCusto-dialog" oncomplete="PF('edicaoCentroDeCustoDialog').show()">
+                    	<p:resetInput target="centroDeCusto-dialog" />
+                    	<f:setPropertyActionListener value="#{centroDeCustoBean.centroDeCustoSelecionado}" target="#{centroDeCustoBean.centroDeCusto}" />	
+                    </p:commandButton>	
+                    
+                    <p:commandButton icon="ui-icon-trash" title="Excluir" disabled="#{centroDeCustoBean.centroDeCustoSelecionado == null}" 
+                    	process="@this" update="tblCentroDeCusto messages toolbar" action="#{centroDeCustoBean.excluir()}">
+                    	<p:confirm icon="ui-icon-aler" header="Confirmação de exclusão" 
+                    		message="Tem certeza que deseja excluir o centroDeCusto selecionado?"/>
+                    </p:commandButton>	
+                      
+                    <p:commandButton icon="ui-icon-arrowthick-1-s" title="Exportar para XLS" ajax="false" immediate="true">
+                    	<p:dataExporter type="xls" target="tblCentroDeCusto" fileName="lista-lotações" />
+                    </p:commandButton>
+					
+				</p:toolbarGroup>
+			</p:toolbar>
+
+			<p:dataTable id="tblCentroDeCusto" style="margin-top: 5px" emptyMessage="Nenhuma lotação encontrada." rows="20"
+				paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				value="#{centroDeCustoBean.centroDeCustosFiltrados}" var="centroDeCusto" selection="#{centroDeCustoBean.centroDeCustoSelecionado}" 
+				selectionMode="single" rowKey="#{centroDeCusto.codigo}">
+			
+				<p:ajax event="rowSelect" update=":frmCentroDeCusto:toolbar" />
+  			    <p:ajax event="rowUnselect" update=":frmCentroDeCusto:toolbar" />
+				
+		        <f:facet name="header">
+		            Lista de Lotações cadastradas
+		        </f:facet>
+		        
+				<p:column headerText="Código" width="100" sortBy="#{centroDeCusto.codigo}">
+					<p:outputLabel value="#{centroDeCusto.codigo}"/>
+				</p:column>
+				
+				<p:column headerText="Lotação" sortBy="#{centroDeCusto.nome}">
+					<p:outputLabel value="#{centroDeCusto.nome}"/>
+				</p:column>
+
+			</p:dataTable>
+
+			<p:dialog header="Nova lotação" widgetVar="edicaoCentroDeCustoDialog"	id="centroDeCusto-dialog" resizable="false" 
+				modal="true" closeOnEscape="true">
+				<p:defaultCommand target="salvar-button" scope="centroDeCusto-dialog" />
+				
+				<p:messages id="msgs" />
+				
+				<p:panelGrid columns="2" id="painel-dialog" columnClasses="rotulo, campo" style="width: 100%; margin-top: 5px">
+				
+					<p:outputLabel value="Código" for="codigo"/>
+					<p:inputText id="codigo" size="15" readonly="true" value="#{centroDeCustoBean.centroDeCusto.codigo}"/>
+
+					<p:outputLabel value="Lotação" for="nomeCentroDeCusto"/>
+					<p:inputText id="nomeCentroDeCusto" size="60" maxlength="120"  value="#{centroDeCustoBean.centroDeCusto.nome}"/>
+						
+					<p:outputLabel value="Status" for="tipo" />
+                	<p:selectOneMenu id="tipo" 	value="#{centroDeCustoBean.centroDeCusto.status}">
+						<f:selectItem itemLabel="Selecione..." />
+						<f:selectItems value="#{centroDeCustoBean.statuss}"
+							var="tipo" itemLabel="#{tipo.descricao}" itemValue="#{tipo}" />
+					</p:selectOneMenu>
+						
+				</p:panelGrid>
+				
+				<p:separator/>
+				<h:panelGrid id="pnlBotoes" columns="1">
+					<h:panelGroup>
+						<p:commandButton value="Salvar" icon="ui-icon-disk" id="salvar-button" process="centroDeCusto-dialog" action="#{centroDeCustoBean.salvar()}"
+							update="msgs painel-dialog" oncomplete="if (!args.validationFailed) PF('edicaoCentroDeCustoDialog').hide()"/>
+						<p:spacer/>
+						<p:spacer/>		
+						<p:commandButton value="Fechar" icon="ui-icon-close" onclick="PF('edicaoCentroDeCustoDialog').hide()"/>
+					</h:panelGroup>
+				</h:panelGrid>
+			</p:dialog>
+			
+		</h:form>
+	</ui:define>
+</ui:composition>

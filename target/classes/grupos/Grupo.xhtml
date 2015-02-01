@@ -1,0 +1,109 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Cadastro e Manutenção de Grupos</ui:define>
+
+	<ui:define name="corpo">
+		<f:metadata>
+	        <f:viewAction action="#{grupoBean.consultar}" />
+	    </f:metadata>
+	
+		<h:form id="frm">
+			<h1>Cadastro e Manutenção de Grupos</h1>
+
+			<p:messages id="messages" closable="true"/>
+			
+			<p:toolbar style="margin-top: 20px" id="toolbar">
+				<p:toolbarGroup>
+					
+					<p:commandButton value="Inserir" icon="ui-icon-document" oncomplete="PF('edicaogrupoDialog').show()"
+						action="#{grupoBean.prepararNovoCadastro()}" process="@this" update="grupo-dialog">
+						<p:resetInput target="grupo-dialog" />
+					</p:commandButton>
+					<p:separator/>
+                    
+                    <p:commandButton icon="ui-icon-pencil" title="Editar" disabled="#{grupoBean.grupoSelecionado == null}"
+                    	process="@this" update="grupo-dialog" oncomplete="PF('edicaogrupoDialog').show()">
+                    	<p:resetInput target="grupo-dialog" />
+                    	<f:setPropertyActionListener value="#{grupoBean.grupoSelecionado}" target="#{grupoBean.grupo}" />	
+                    </p:commandButton>	
+                    
+                    <p:commandButton icon="ui-icon-trash" title="Excluir" disabled="#{grupoBean.grupoSelecionado == null}" 
+                    	process="@this" update="tblGrupo messages toolbar" action="#{grupoBean.excluir()}">
+                    	<p:confirm icon="ui-icon-aler" header="Confirmação de exclusão" 
+                    		message="Tem certeza que deseja excluir a grupo?"/>
+                    </p:commandButton>	
+                      
+                    <p:commandButton icon="ui-icon-arrowthick-1-s" title="Exportar para XLS" ajax="false" immediate="true">
+                    	<p:dataExporter type="xls" target="tblGrupo" fileName="lista-lotações" />
+                    </p:commandButton>
+					
+				</p:toolbarGroup>
+			</p:toolbar>
+
+			<p:dataTable id="tblGrupo" style="margin-top: 5px" emptyMessage="Nenhum grupo encontrado." rows="20"
+				paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				value="#{grupoBean.gruposFiltrados}" var="grupo" selection="#{grupoBean.grupoSelecionado}" 
+				selectionMode="single" rowKey="#{grupo.codigo}">
+			
+				<p:ajax event="rowSelect" update=":frm:toolbar" />
+  			    <p:ajax event="rowUnselect" update=":frm:toolbar" />
+				
+		        <f:facet name="header">Lista de Grupos cadastrados</f:facet>
+		        
+				<p:column headerText="Código" width="100" sortBy="#{grupo.codigo}">
+					<p:outputLabel value="#{grupo.codigo}"/>
+				</p:column>
+				
+				<p:column headerText="Grupo" sortBy="#{grupo.nome}">
+					<p:outputLabel value="#{grupo.nome}"/>
+				</p:column>
+				
+				<p:column headerText="Status" width="100" sortBy="#{grupo.status.descricao}">
+					<p:outputLabel value="#{grupo.status.descricao}"/>
+				</p:column>				
+
+			</p:dataTable>
+
+			<p:dialog header="Novo grupo" widgetVar="edicaogrupoDialog"	id="grupo-dialog" resizable="false" 
+				modal="true" closeOnEscape="true">
+				<p:defaultCommand target="salvar-button" scope="grupo-dialog" />
+				
+				<p:messages id="msgs" />
+				
+				<p:panelGrid columns="2" id="painel-dialog" columnClasses="rotulo, campo" style="width: 100%; margin-top: 5px">
+				
+					<p:outputLabel value="Código" for="codigo"/>
+					<p:inputText id="codigo" size="15" readonly="true"  value="#{grupoBean.grupo.codigo}"/>
+
+					<p:outputLabel value="Grupo" for="nomegrupo"/>
+					<p:inputText id="nomegrupo" size="60" maxlength="120"  value="#{grupoBean.grupo.nome}"/>
+					
+					<p:outputLabel value="Status" for="tipo" />
+                	<p:selectOneMenu id="tipo" 	value="#{grupoBean.grupo.status}">
+						<f:selectItem itemLabel="Selecione..." />
+						<f:selectItems value="#{grupoBean.statuss}"
+							var="tipo" itemLabel="#{tipo.descricao}" itemValue="#{tipo}" />
+					</p:selectOneMenu>
+						
+				</p:panelGrid>
+				
+				<p:separator/>
+				<h:panelGrid id="pnlBotoes" columns="1">
+					<h:panelGroup>
+						<p:commandButton value="Salvar" icon="ui-icon-disk" id="salvar-button" process="grupo-dialog" action="#{grupoBean.salvar()}"
+							update="msgs painel-dialog" oncomplete="if (!args.validationFailed) PF('edicaogrupoDialog').hide()"/>
+						<p:spacer/>
+						<p:spacer/>		
+						<p:commandButton value="Fechar" icon="ui-icon-close" onclick="PF('edicaogrupoDialog').hide()"/>
+					</h:panelGroup>
+				</h:panelGrid>
+			</p:dialog>
+			
+		</h:form>
+	</ui:define>
+</ui:composition>

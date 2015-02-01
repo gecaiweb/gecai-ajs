@@ -1,0 +1,79 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Consulta Fornecedor</ui:define>
+
+	<ui:define name="corpo">
+
+		<h:form id="frmPesquisa">
+			<h1>Consulta Fornecedor</h1>
+			<p:messages id="messages" autoUpdate="true" closable="true"/>
+
+			<p:toolbar style="margin-top: 20px">
+				<p:toolbarGroup>
+					<p:commandButton value="Pesquisar" icon="ui-icon-search"  action="#{consultaFornecedorBean.consultar()}" update="@form"/>
+				</p:toolbarGroup>
+
+				<p:toolbarGroup align="right">
+					<p:button value="Novo" id="botaoNovo" icon="ui-icon-circle-plus" outcome="/fornecedores/CadastroFornecedor"/>
+				</p:toolbarGroup>
+			</p:toolbar>
+			
+			<p:panelGrid columns="2" id="painel" style="width: 100%; margin-top: 20px" columnClasses="rotulo, campo">
+				<p:outputLabel value="Nome/Razão Social" for="nomeRazaoSocial"/>
+				<p:inputText id="nomeRazaoSocial" size="70" maxlength="50"  value="#{consultaFornecedorBean.filtro.nome}"/>
+				
+				<p:outputLabel value="Cnpj" for="cnpj"/>
+				<p:inputText id="cnpj" size="20" maxlength="20" value="#{consultaFornecedorBean.filtro.documentoReceitaFederal}"/>
+				
+				<p:outputLabel value="Inscrição Estadual" for="inscricaoEstadual"/>
+				<p:inputText id="inscricaoEstadual" size="20" maxlength="20" value="#{consultaFornecedorBean.filtro.registroGeral}"/>			
+				
+				<p:outputLabel value="Situação" />
+   				<p:selectManyCheckbox value="#{consultaFornecedorBean.filtro.status}">
+   					 <f:selectItems value="#{consultaFornecedorBean.statuss}" var="status"  itemValue="#{status}" itemLabel="#{status.descricao}" />
+   			 	</p:selectManyCheckbox>	
+					
+			</p:panelGrid>			
+
+			<p:dataTable id="tblFornecedor" style="margin-top: 20px" emptyMessage="Nenhum fornecedor encontrado." 
+				rows="20" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				value="#{consultaFornecedorBean.fornecedoresFiltrados}" var="fornecedor">
+				
+				<p:column headerText="Codigo" style="width: 100px; text-align: center">
+					<h:outputText value="#{fornecedor.codigo}"/>
+				</p:column>
+				
+				<p:column headerText="Razão Social">
+					<h:outputText value="#{fornecedor.nome}"/>
+				</p:column>				
+
+				<p:column headerText="Cnpj"	style="text-align: center; width: 250px">
+					<h:outputText value="#{fornecedor.documentoReceitaFederal}"/>
+				</p:column>
+
+				<p:column headerText="Inscrição Estadual" style="text-align: center; width: 250px">
+					<h:outputText value="#{fornecedor.registroEstadual}"/>
+				</p:column>
+
+				<p:column style="width: 100px; text-align: center">
+					<p:button outcome="CadastroFornecedor" icon="ui-icon-pencil" title="Editar">
+						<f:param name="fornecedor" value="#{fornecedor.codigo}" />
+					</p:button>
+					
+					<p:commandButton icon="ui-icon-trash" title="Excluir" process="@this" update="tblFornecedor"
+						action="#{consultaFornecedorBean.excluir()}" >
+						<p:confirm icon="ui-icon-aler" header="Confirmação de exclusão"  	message="Tem certeza que deseja excluir o fornecedor selecionado?"/>
+                    	<f:setPropertyActionListener target="#{consultaFornecedorBean.fornecedorSelecionado}" value="#{fornecedor}" />
+					</p:commandButton>	
+				</p:column>
+
+			</p:dataTable>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

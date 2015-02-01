@@ -1,0 +1,108 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Cadastro e Manutenção de Bancos</ui:define>
+
+	<ui:define name="corpo">
+		<f:metadata>
+	        <f:viewAction action="#{bancoBean.consultar}" />
+	    </f:metadata>
+	
+		<h:form id="frmBanco">
+			<h1>Cadastro e Manutenção de Bancos</h1>
+
+			<p:messages id="messages" closable="true"/>
+			
+			<p:toolbar style="margin-top: 20px" id="toolbar">
+				<p:toolbarGroup>
+					
+					<p:commandButton value="Inserir" icon="ui-icon-document" oncomplete="PF('edicaoBancoDialog').show()"
+						action="#{bancoBean.prepararNovoCadastro()}" process="@this" update="banco-dialog">
+						<p:resetInput target="banco-dialog" />
+					</p:commandButton>
+					<p:separator/>
+                    
+                    <p:commandButton icon="ui-icon-pencil" title="Editar" disabled="#{bancoBean.bancoSelecionado == null}"
+                    	process="@this" update="banco-dialog" oncomplete="PF('edicaoBancoDialog').show()">
+                    	<p:resetInput target="banco-dialog" />
+                    	<f:setPropertyActionListener value="#{bancoBean.bancoSelecionado}" target="#{bancoBean.banco}" />	
+                    </p:commandButton>	
+                    
+                    <p:commandButton icon="ui-icon-trash" title="Excluir" disabled="#{bancoBean.bancoSelecionado == null}" 
+                    	process="@this" update="tblBanco messages toolbar" action="#{bancoBean.excluir()}">
+                    	<p:confirm icon="ui-icon-aler" header="Confirmação de exclusão" 
+                    		message="Tem certeza que deseja excluir o banco selecionado?"/>
+                    </p:commandButton>	
+                      
+                    <p:commandButton icon="ui-icon-arrowthick-1-s" title="Exportar para XLS" ajax="false" immediate="true">
+                    	<p:dataExporter type="xls" target="tblBanco" fileName="lista-lotações" />
+                    </p:commandButton>
+					
+				</p:toolbarGroup>
+			</p:toolbar>
+
+			<p:dataTable id="tblBanco" style="margin-top: 5px" emptyMessage="Nenhuma lotação encontrada." rows="20"
+				paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				value="#{bancoBean.bancosFiltrados}" var="banco" selection="#{bancoBean.bancoSelecionado}" 
+				selectionMode="single" rowKey="#{banco.codigo}">
+			
+				<p:ajax event="rowSelect" update=":frmBanco:toolbar" />
+  			    <p:ajax event="rowUnselect" update=":frmBanco:toolbar" />
+				
+		        <f:facet name="header">
+		            Lista de Lotações cadastradas
+		        </f:facet>
+		        
+				<p:column headerText="Código" width="100" sortBy="#{banco.codigo}">
+					<p:outputLabel value="#{banco.codigo}"/>
+				</p:column>
+				
+				<p:column headerText="Número" width="100" sortBy="#{banco.numero}">
+					<p:outputLabel value="#{banco.numero}"/>
+				</p:column>
+				
+				<p:column headerText="Lotação" sortBy="#{banco.nome}">
+					<p:outputLabel value="#{banco.nome}"/>
+				</p:column>
+
+			</p:dataTable>
+
+			<p:dialog header="Nova lotação" widgetVar="edicaoBancoDialog"	id="banco-dialog" resizable="false" 
+				modal="true" closeOnEscape="true">
+				<p:defaultCommand target="salvar-button" scope="banco-dialog" />
+				
+				<p:messages id="msgs" />
+				
+				<p:panelGrid columns="2" id="painel-dialog" columnClasses="rotulo, campo" style="width: 100%; margin-top: 5px">
+				
+					<p:outputLabel value="Código" for="codigo"/>
+					<p:inputText id="codigo" size="15" readonly="true" value="#{bancoBean.banco.codigo}"/>
+
+					<p:outputLabel value="Número" for="numero"/>
+					<p:inputText id="numero" size="15" value="#{bancoBean.banco.numero}"/>
+
+
+					<p:outputLabel value="Lotação" for="nomeBanco"/>
+					<p:inputText id="nomeBanco" size="60" maxlength="120"  value="#{bancoBean.banco.nome}"/>
+						
+				</p:panelGrid>
+				
+				<p:separator/>
+				<h:panelGrid id="pnlBotoes" columns="1">
+					<h:panelGroup>
+						<p:commandButton value="Salvar" icon="ui-icon-disk" id="salvar-button" process="banco-dialog" action="#{bancoBean.salvar()}"
+							update="msgs painel-dialog" oncomplete="if (!args.validationFailed) PF('edicaoBancoDialog').hide()"/>
+						<p:spacer/>
+						<p:spacer/>		
+						<p:commandButton value="Fechar" icon="ui-icon-close" onclick="PF('edicaoBancoDialog').hide()"/>
+					</h:panelGroup>
+				</h:panelGrid>
+			</p:dialog>
+			
+		</h:form>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,80 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Consulta Cliente</ui:define>
+
+	<ui:define name="corpo">
+
+		<h:form id="frmPesquisa">
+			<h1>Consulta Cliente</h1>
+			<p:messages id="messages" autoUpdate="true" closable="true"/>
+
+			<p:toolbar style="margin-top: 20px">
+				<p:toolbarGroup>
+					<p:commandButton value="Pesquisar" icon="ui-icon-search"  action="#{consultaClienteBean.consultar()}" update="@form"/>
+				</p:toolbarGroup>
+
+				<p:toolbarGroup align="right">
+					<p:button value="Novo" id="botaoNovo" icon="ui-icon-circle-plus" outcome="/clientes/CadastroCliente"/>
+				</p:toolbarGroup>
+			</p:toolbar>
+			
+			<p:panelGrid columns="2" id="painel" style="width: 100%; margin-top: 20px" columnClasses="rotulo, campo">
+				<p:outputLabel value="Nome/Razão Social" for="nomeRazaoSocial"/>
+				<p:inputText id="nomeRazaoSocial" size="70" maxlength="50"  value="#{consultaClienteBean.filtro.nome}"/>
+				
+				<p:outputLabel value="Cnpj" for="cnpj"/>
+				<p:inputText id="cnpj" size="20" maxlength="20" value="#{consultaClienteBean.filtro.documentoReceitaFederal}"/>
+				
+				<p:outputLabel value="Inscrição Estadual" for="inscricaoEstadual"/>
+				<p:inputText id="inscricaoEstadual" size="20" maxlength="20" value="#{consultaClienteBean.filtro.registroGeral}"/>			
+				
+				<p:outputLabel value="Situação" />
+   				<p:selectManyCheckbox value="#{consultaClienteBean.filtro.status}">
+   					 <f:selectItems value="#{consultaClienteBean.statuss}" var="status"  itemValue="#{status}" itemLabel="#{status.descricao}" />
+   			 	</p:selectManyCheckbox>	
+					
+			</p:panelGrid>			
+
+			<p:dataTable id="tblCliente" style="margin-top: 20px" emptyMessage="Nenhum cliente encontrado." 
+				rows="20" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				value="#{consultaClienteBean.clientesFiltrados}" var="cliente">
+				
+				<p:column headerText="Codigo" style="width: 100px; text-align: center">
+					<h:outputText value="#{cliente.codigo}"/>
+				</p:column>
+				
+				<p:column headerText="Razão Social">
+					<h:outputText value="#{cliente.nome}"/>
+				</p:column>				
+
+				<p:column headerText="Cnpj"	style="text-align: center; width: 250px">
+					<h:outputText value="#{cliente.documentoReceitaFederal}"/>
+				</p:column>
+
+				<p:column headerText="Inscrição Estadual" style="text-align: center; width: 250px">
+					<h:outputText value="#{cliente.registroEstadual}"/>
+				</p:column>
+
+				<p:column style="width: 100px; text-align: center">
+					<p:button outcome="CadastroCliente" icon="ui-icon-pencil" title="Editar">
+						<f:param name="cliente" value="#{cliente.codigo}" />
+					</p:button>
+					
+					<p:commandButton icon="ui-icon-trash" title="Excluir" process="@this" update="tblCliente"
+						action="#{consultaClienteBean.excluir()}" >
+						<p:confirm icon="ui-icon-aler" header="Confirmação de exclusão" 
+                    		message="Tem certeza que deseja excluir o cliente selecionado?"/>
+                    	<f:setPropertyActionListener target="#{consultaClienteBean.clienteSelecionado}" value="#{cliente}" />
+					</p:commandButton>	
+				</p:column>
+
+			</p:dataTable>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

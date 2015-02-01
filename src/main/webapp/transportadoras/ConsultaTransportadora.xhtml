@@ -1,0 +1,80 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Consulta Transportadora</ui:define>
+
+	<ui:define name="corpo">
+
+		<h:form id="frmPesquisa">
+			<h1>Consulta Transportadora</h1>
+			<p:messages id="messages" autoUpdate="true" closable="true"/>
+
+			<p:toolbar style="margin-top: 20px">
+				<p:toolbarGroup>
+					<p:commandButton value="Pesquisar" icon="ui-icon-search"  action="#{consultaTransportadoraBean.consultar()}" update="@form"/>
+				</p:toolbarGroup>
+
+				<p:toolbarGroup align="right">
+					<p:button value="Novo" id="botaoNovo" icon="ui-icon-circle-plus" outcome="/transportadoras/CadastroTransportadora"/>
+				</p:toolbarGroup>
+			</p:toolbar>
+			
+			<p:panelGrid columns="2" id="painel" style="width: 100%; margin-top: 20px" columnClasses="rotulo, campo">
+				<p:outputLabel value="Nome/Razão Social" for="nomeRazaoSocial"/>
+				<p:inputText id="nomeRazaoSocial" size="70" maxlength="50"  value="#{consultaTransportadoraBean.filtro.nome}"/>
+				
+				<p:outputLabel value="Cnpj" for="cnpj"/>
+				<p:inputText id="cnpj" size="20" maxlength="20" value="#{consultaTransportadoraBean.filtro.documentoReceitaFederal}"/>
+				
+				<p:outputLabel value="Inscrição Estadual" for="inscricaoEstadual"/>
+				<p:inputText id="inscricaoEstadual" size="20" maxlength="20" value="#{consultaTransportadoraBean.filtro.registroGeral}"/>			
+				
+				<p:outputLabel value="Situação" />
+   				<p:selectManyCheckbox value="#{consultaTransportadoraBean.filtro.status}">
+   					 <f:selectItems value="#{consultaTransportadoraBean.statuss}" var="status"  itemValue="#{status}" itemLabel="#{status.descricao}" />
+   			 	</p:selectManyCheckbox>	
+					
+			</p:panelGrid>			
+
+			<p:dataTable id="tblTransportadora" style="margin-top: 20px" emptyMessage="Nenhuma transportadora encontrada." 
+				rows="20" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				value="#{consultaTransportadoraBean.transportadorasFiltradas}" var="transportadora">
+				
+				<p:column headerText="Codigo" style="width: 100px; text-align: center">
+					<h:outputText value="#{transportadora.codigo}"/>
+				</p:column>
+				
+				<p:column headerText="Razão Social">
+					<h:outputText value="#{transportadora.nome}"/>
+				</p:column>				
+
+				<p:column headerText="Cnpj"	style="text-align: center; width: 250px">
+					<h:outputText value="#{transportadora.documentoReceitaFederal}"/>
+				</p:column>
+
+				<p:column headerText="Inscrição Estadual" style="text-align: center; width: 250px">
+					<h:outputText value="#{transportadora.registroEstadual}"/>
+				</p:column>
+
+				<p:column style="width: 100px; text-align: center">
+					<p:button outcome="CadastroTransportadora" icon="ui-icon-pencil" title="Editar">
+						<f:param name="transportadora" value="#{transportadora.codigo}" />
+					</p:button>
+					
+					<p:commandButton icon="ui-icon-trash" title="Excluir" process="@this" update="tblTransportadora"
+						action="#{consultaTransportadoraBean.excluir()}" >
+						<p:confirm icon="ui-icon-aler" header="Confirmação de exclusão" 
+                    		message="Tem certeza que deseja excluir o transportadora selecionado?"/>
+                    	<f:setPropertyActionListener target="#{consultaTransportadoraBean.transportadoraSelecionada}" value="#{transportadora}" />
+					</p:commandButton>	
+				</p:column>
+
+			</p:dataTable>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

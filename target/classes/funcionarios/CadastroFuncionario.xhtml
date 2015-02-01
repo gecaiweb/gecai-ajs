@@ -1,0 +1,133 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui" xmlns:o="http://omnifaces.org/ui">
+
+	<ui:define name="titulo">Cadastro Funcionário</ui:define>
+
+	<ui:define name="corpo">
+		<f:metadata>
+			<o:viewParam name="funcionario" value="#{cadastroFuncionarioBean.funcionario}" converter="funcionarioConverter"/>
+		</f:metadata>
+
+		<h:form id="frmCadastro">
+			<h1>Cadastro Funcionário</h1>
+			<p:messages id="messages" autoUpdate="true" closable="true"/>
+			<p:toolbar style="margin-top: 20px">
+				<p:toolbarGroup>
+					<p:commandButton value="Novo" id="botaoNovo" icon="ui-icon-circle-plus"
+						action="#{cadastroFuncionarioBean.limpar()}" update="@form"/>
+					<p:separator/>
+					<p:commandButton value="Salvar" icon="ui-icon-disk" id="salvar-button"  
+						action="#{cadastroFuncionarioBean.salvar()}" update="@form"/>
+				</p:toolbarGroup>
+				
+				<p:toolbarGroup align="right">
+					<p:button value="Pesquisa" icon="ui-icon-search" outcome="/funcionarios/ConsultaFuncionario"/>
+				</p:toolbarGroup>
+			</p:toolbar>
+
+			<p:panelGrid columns="4" id="painel" style="width: 100%; margin-top: 20px" columnClasses="rotulo, campo, rotulo, campo">
+				
+				<p:outputLabel value="Nome" for="nome"/>
+				<p:inputText id="nome" size="50" maxlength="70" value="#{cadastroFuncionarioBean.funcionario.nome}"/>
+				
+				<p:outputLabel value="Situação" for="situacao" />
+                <p:selectOneMenu id="situacao" 	value="#{cadastroFuncionarioBean.funcionario.statusFuncionario}" style="width:180px">
+					<f:selectItem itemLabel="Selecione a situação" />
+					<f:selectItems value="#{cadastroFuncionarioBean.statussFuncionario}"
+						var="tipo" itemLabel="#{tipo.descricao}" itemValue="#{tipo}" />
+				</p:selectOneMenu>
+				
+				<p:outputLabel value="Cpf" for="cpf"/>
+				<p:inputText id="cpf" size="20" maxlength="20" value="#{cadastroFuncionarioBean.funcionario.documentoReceitaFederal}"/>
+				
+				<p:outputLabel value="Registro Geral" for="registroGeral"/>
+				<p:inputText id="registroGeral" size="20" maxlength="20" value="#{cadastroFuncionarioBean.funcionario.registroEstadual}"/>
+				
+				<p:outputLabel value="Nacioalidade" for="nacionalidade"/>
+                <p:selectOneMenu id="nacionalidade" value="#{cadastroFuncionarioBean.funcionario.nacionalidade}" panelStyle="width:180px"
+                    effect="fade" style="width:180px" filter="true" filterMatchMode="startsWith">
+					<f:selectItem itemLabel="Selecione a nacionalidade"/>
+					<f:selectItems value="#{cadastroFuncionarioBean.nacionalidades}" var="nasc" itemLabel="#{nasc.descricao}" itemValue="#{nasc}"/>
+				</p:selectOneMenu>
+				
+				<p:spacer/>
+				<p:spacer/>
+				
+				<p:outputLabel value="Função" for="funcao"/>
+                <p:selectOneMenu id="funcao" value="#{cadastroFuncionarioBean.funcionario.funcao}" panelStyle="width:180px"
+                    effect="fade" style="width:180px" filter="true" filterMatchMode="startsWith">
+					<f:selectItem itemLabel="Selecione a função"/>
+					<f:selectItems value="#{cadastroFuncionarioBean.funcoes}"
+						var="func" itemLabel="#{func.nome}" itemValue="#{func}"/>
+				</p:selectOneMenu>
+				
+				<p:outputLabel value="Salário" for="salario"/>
+				<p:inputText id="salario" size="10" maxlength="20" value="#{cadastroFuncionarioBean.funcionario.salario}" 
+					styleClass="moeda">
+					<f:convertNumber maxFractionDigits="2" minFractionDigits="2"/>
+				</p:inputText>	
+		
+				<p:outputLabel value="Lotação" for="lotacao"/>
+                <p:selectOneMenu id="lotacao" value="#{cadastroFuncionarioBean.funcionario.lotacao}" style="width:180px">
+					<f:selectItem itemLabel="Selecione a lotacao"/>
+					<f:selectItems value="#{cadastroFuncionarioBean.lotacoes}"
+						var="lot" itemLabel="#{lot.nome}" itemValue="#{lot}"/>
+				</p:selectOneMenu>
+				
+				<p:outputLabel value="Status" for="status"/>
+                <p:selectOneMenu id="status" value="#{cadastroFuncionarioBean.funcionario.status}" style="width:180px">
+					<f:selectItem itemLabel="Selecione o status"/>
+					<f:selectItems value="#{cadastroFuncionarioBean.statuss}"
+						var="stat" itemLabel="#{stat.descricao}" itemValue="#{stat}"/>
+				</p:selectOneMenu>
+		
+			</p:panelGrid>
+
+			<p:fieldset legend="Endereço" toggleable="true" style="margin-top: 20px">
+				<h:panelGroup>
+					<p:panelGrid columns="4" id="pnlEndereco" style="width: 100%; margin-top: 20px" columnClasses="rotulo, campo, rotulo, campo">
+						<p:outputLabel value="Cep" for="cep"/>
+						<h:panelGroup>
+								<p:inputMask mask="99999-999" id="cep" size="10" maxlength="9" value="#{cadastroFuncionarioBean.funcionario.endereco.cep}"/>
+								<p:spacer/><p:spacer/>
+								<p:button icon="ui-icon-search" title="Buscar CEP"/>
+						</h:panelGroup>
+
+						<p:spacer/>
+						<p:spacer/>
+
+						<p:outputLabel value="Logradouro" for="logradouro"/>
+						<p:inputText id="logradouro" size="60" maxlength="100" value="#{cadastroFuncionarioBean.funcionario.endereco.logradouro}"/>
+						
+						<p:outputLabel value="Número" for="numero"/>
+						<p:inputText id="numero" size="20" maxlength="10" value="#{cadastroFuncionarioBean.funcionario.endereco.numero}"/>
+
+						<p:outputLabel value="Complemento" for="complemento"/>
+						<p:inputText id="complemento" size="60" maxlength="10" value="#{cadastroFuncionarioBean.funcionario.endereco.complemento}"/>
+												
+						<p:outputLabel value="Bairro" for="bairro"/>
+						<p:inputText id="bairro" size="60" maxlength="10" value="#{cadastroFuncionarioBean.funcionario.endereco.bairro}"/>
+						
+						<p:outputLabel value="País" for="pais"/>
+						<p:inputText id="pais" size="20" maxlength="10" value="#{cadastroFuncionarioBean.funcionario.endereco.pais}"/>
+						
+						<p:outputLabel value="UF" for="uf"/>
+						<p:inputText id="uf" size="20" maxlength="2" value="#{cadastroFuncionarioBean.funcionario.endereco.estado}"/>
+												
+						<p:outputLabel value="Município" for="municipio"/>
+						<p:inputText id="municipio" size="40" maxlength="10" value="#{cadastroFuncionarioBean.funcionario.endereco.cidade}"/>
+						
+						<p:outputLabel value="Telefone" for="telefone"/>
+						<p:inputText id="telefone" size="40" maxlength="10"/>						
+					
+					</p:panelGrid>
+				</h:panelGroup>
+			</p:fieldset>
+		</h:form>
+	</ui:define>
+
+</ui:composition>

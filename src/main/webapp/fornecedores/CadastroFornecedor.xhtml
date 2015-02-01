@@ -1,0 +1,123 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui" xmlns:o="http://omnifaces.org/ui">
+
+	<ui:define name="titulo">Cadastro Fornecedor</ui:define>
+
+	<ui:define name="corpo">
+			<f:metadata>
+				<o:viewParam name="fornecedor" value="#{cadastroFornecedorBean.fornecedor}" converter="fornecedorConverter"/>
+		</f:metadata>
+
+		<h:form id="frmCadastro">
+			<h1>Cadastro de Fornecedor</h1>
+			<p:messages id="messages" autoUpdate="true" closable="true"/>
+			<p:toolbar style="margin-top: 20px">
+				<p:toolbarGroup>
+					<p:commandButton value="Novo" id="botaoNovo" icon="ui-icon-circle-plus"  action="#{cadastroFornecedorBean.limpar()}" update="@form"/>
+					<p:separator/>
+					<p:commandButton value="Salvar" id="botaoSalvar" icon="ui-icon-disk" action="#{cadastroFornecedorBean.salvar()}" update="@form"/>
+				</p:toolbarGroup>
+				
+				<p:toolbarGroup align="right">
+					<p:button value="Pesquisa" icon="ui-icon-search" outcome="/fornecedores/ConsultaFornecedor"/>
+				</p:toolbarGroup>
+			</p:toolbar>
+
+			<p:panelGrid columns="4" id="painel" style="width: 100%; margin-top: 20px" columnClasses="rotulo, campo, rotulo, campo">
+				
+				<h:outputText value="Tipo Pessoa"/>
+				<p:selectOneButton value="#{cadastroFornecedorBean.fornecedor.tipoPessoa}" >
+					<f:selectItems value="#{cadastroFornecedorBean.tipo}" var="tipo" itemLabel="#{tipo.descricao}" itemValue="#{tipo}"/>
+				</p:selectOneButton>
+			
+				<p:spacer/>
+				<p:spacer/>
+				
+				<p:outputLabel value="Nome/Razão Social" for="nomeRazaoSocial"/>
+				<p:inputText id="nomeRazaoSocial" size="50" maxlength="70"  value="#{cadastroFornecedorBean.fornecedor.nome}"/>
+				
+				<p:outputLabel value="Cnpj" for="cnpj"/>
+				<p:inputText id="cnpj" size="20" maxlength="20" value="#{cadastroFornecedorBean.fornecedor.documentoReceitaFederal}"/>
+				
+				<p:outputLabel value="Inscrição Estadual" for="inscricaoEstadual"/>
+				<p:inputText id="inscricaoEstadual" size="20" maxlength="20" value="#{cadastroFornecedorBean.fornecedor.registroEstadual}"/>
+				
+				<p:outputLabel value="Inscrição Social" for="inscricaoSocial"/>
+				<p:inputText id="inscricaoSocial" size="20" maxlength="20" value="#{cadastroFornecedorBean.fornecedor.inscricaoSocial}"/>
+
+				<p:outputLabel value="Inscrição SUFRAMA" for="inscricaoSuframa"/>
+				<p:inputText id="inscricaoSuframa" size="20" maxlength="20" value="#{cadastroFornecedorBean.fornecedor.inscricaoSuframa}"/>
+				
+				<p:outputLabel value="Status" for="status"/>
+                <p:selectOneMenu id="status" value="#{cadastroFornecedorBean.fornecedor.status}" style="width:180px">
+					<f:selectItem itemLabel="Selecione o status"/>
+					<f:selectItems value="#{cadastroFornecedorBean.statuss}"
+						var="stat" itemLabel="#{stat.descricao}" itemValue="#{stat}"/>
+				</p:selectOneMenu>
+				
+				<p:spacer/>
+				<h:panelGroup>
+	   			     <p:selectBooleanCheckbox  value="#{cadastroFornecedorBean.fornecedor.isentoIcms}"/>
+	   			     <p:spacer/><p:spacer/>
+					<h:outputText value="Isento de ICMS " />
+				</h:panelGroup>
+				
+				<p:outputLabel value="Prazo para pagamento(dias)" for="prazo"/>
+				<p:inputText id="prazo" size="10" maxlength="3" value="#{cadastroFornecedorBean.fornecedor.prazoPagamento}"/>
+				
+				<p:outputLabel value="Prazo para entrega(dias)" for="prazoEntrega"/>
+				<p:inputText id="prazoEntrega" size="10" maxlength="3" value="#{cadastroFornecedorBean.fornecedor.prazoPagamento}"/>
+				
+		
+			</p:panelGrid>
+
+			<p:fieldset legend="Endereço" toggleable="true" style="margin-top: 20px">
+				<h:panelGroup>
+					<p:panelGrid columns="4" id="pnlEndereco" style="width: 100%; margin-top: 20px" columnClasses="rotulo, campo, rotulo, campo">
+						<p:outputLabel value="Cep" for="cep"/>
+						<h:panelGroup>
+								<p:inputMask mask="99999-999" id="cep" size="10" maxlength="9"/>
+								<p:spacer/><p:spacer/>
+								<p:button icon="ui-icon-search" title="Buscar CEP"/>
+						</h:panelGroup>
+
+						<p:spacer/>
+						<p:spacer/>
+
+						<p:outputLabel value="Logradouro" for="logradouro"/>
+						<p:inputText id="logradouro" size="60" maxlength="100"/>
+						
+						<p:outputLabel value="Número" for="numero"/>
+						<p:inputText id="numero" size="20" maxlength="10"/>
+
+						<p:outputLabel value="Complemento" for="complemento"/>
+						<p:inputText id="complemento" size="60" maxlength="10"/>
+												
+						<p:outputLabel value="Bairro" for="bairro"/>
+						<p:inputText id="bairro" size="60" maxlength="10"/>
+						
+						<p:outputLabel value="País" for="pais"/>
+						<p:inputText id="pais" size="20" maxlength="10"/>
+						
+						<p:outputLabel value="UF" for="uf"/>
+						<p:inputText id="uf" size="20" maxlength="10"/>
+												
+						<p:outputLabel value="Município" for="municipio"/>
+						<p:inputText id="municipio" size="40" maxlength="10"/>
+						
+						<p:outputLabel value="Telefone" for="telefone"/>
+						<p:inputText id="telefone" size="40" maxlength="10"/>						
+					
+					</p:panelGrid>
+				</h:panelGroup>
+			</p:fieldset>
+
+
+		</h:form>
+	</ui:define>
+
+</ui:composition>

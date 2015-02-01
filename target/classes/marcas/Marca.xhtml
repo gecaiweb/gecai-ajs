@@ -1,0 +1,100 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Cadastro e Manutenção de Marcas</ui:define>
+
+	<ui:define name="corpo">
+		<f:metadata>
+	        <f:viewAction action="#{marcaBean.consultar}" />
+	    </f:metadata>
+	
+		<h:form id="frmMarca">
+			<h1>Cadastro e Manutenção de Marcas</h1>
+
+			<p:messages id="messages" closable="true"/>
+			
+			<p:toolbar style="margin-top: 20px" id="toolbar">
+				<p:toolbarGroup>
+					
+					<p:commandButton value="Inserir" icon="ui-icon-document" oncomplete="PF('edicaoMarcaDialog').show()"
+						action="#{marcaBean.prepararNovoCadastro()}" process="@this" update="marca-dialog">
+						<p:resetInput target="marca-dialog" />
+					</p:commandButton>
+					<p:separator/>
+                    
+                    <p:commandButton icon="ui-icon-pencil" title="Editar" disabled="#{marcaBean.marcaSelecionada == null}"
+                    	process="@this" update="marca-dialog" oncomplete="PF('edicaoMarcaDialog').show()">
+                    	<p:resetInput target="marca-dialog" />
+                    	<f:setPropertyActionListener value="#{marcaBean.marcaSelecionada}" target="#{marcaBean.marca}" />	
+                    </p:commandButton>	
+                    
+                    <p:commandButton icon="ui-icon-trash" title="Excluir" disabled="#{marcaBean.marcaSelecionada == null}" 
+                    	process="@this" update="tblMarca messages toolbar" action="#{marcaBean.excluir()}">
+                    	<p:confirm icon="ui-icon-aler" header="Confirmação de exclusão" 
+                    		message="Tem certeza que deseja excluir a marca selecionada?"/>
+                    </p:commandButton>	
+                      
+                    <p:commandButton icon="ui-icon-arrowthick-1-s" title="Exportar para XLS" ajax="false" immediate="true">
+                    	<p:dataExporter type="xls" target="tblMarca" fileName="lista-lotações" />
+                    </p:commandButton>
+					
+				</p:toolbarGroup>
+			</p:toolbar>
+
+			<p:dataTable id="tblMarca" style="margin-top: 5px" emptyMessage="Nenhuma lotação encontrada." rows="20"
+				paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				value="#{marcaBean.marcasFiltradas}" var="marca" selection="#{marcaBean.marcaSelecionada}" 
+				selectionMode="single" rowKey="#{marca.codigo}">
+			
+				<p:ajax event="rowSelect" update=":frmMarca:toolbar" />
+  			    <p:ajax event="rowUnselect" update=":frmMarca:toolbar" />
+				
+		        <f:facet name="header">
+		            Lista de Marcas cadastradas
+		        </f:facet>
+		        
+				<p:column headerText="Código" width="100" sortBy="#{marca.codigo}">
+					<p:outputLabel value="#{marca.codigo}"/>
+				</p:column>
+				
+				<p:column headerText="Lotação" sortBy="#{marca.nome}">
+					<p:outputLabel value="#{marca.nome}"/>
+				</p:column>
+
+			</p:dataTable>
+
+			<p:dialog header="Nova lotação" widgetVar="edicaoMarcaDialog"	id="marca-dialog" resizable="false" 
+				modal="true" closeOnEscape="true">
+				<p:defaultCommand target="salvar-button" scope="marca-dialog" />
+				
+				<p:messages id="msgs" />
+				
+				<p:panelGrid columns="2" id="painel-dialog" columnClasses="rotulo, campo" style="width: 100%; margin-top: 5px">
+				
+					<p:outputLabel value="Código" for="codigo"/>
+					<p:inputText id="codigo" size="15" readonly="true" value="#{marcaBean.marca.codigo}"/>
+
+					<p:outputLabel value="Nome" for="nomeMarca"/>
+					<p:inputText id="nomeMarca" size="60" maxlength="120"  value="#{marcaBean.marca.nome}"/>
+						
+				</p:panelGrid>
+				
+				<p:separator/>
+				<h:panelGrid id="pnlBotoes" columns="1">
+					<h:panelGroup>
+						<p:commandButton value="Salvar" icon="ui-icon-disk" id="salvar-button" process="marca-dialog" action="#{marcaBean.salvar()}"
+							update="msgs painel-dialog" oncomplete="if (!args.validationFailed) PF('edicaoMarcaDialog').hide()"/>
+						<p:spacer/>
+						<p:spacer/>		
+						<p:commandButton value="Fechar" icon="ui-icon-close" onclick="PF('edicaoMarcaDialog').hide()"/>
+					</h:panelGroup>
+				</h:panelGrid>
+			</p:dialog>
+			
+		</h:form>
+	</ui:define>
+</ui:composition>

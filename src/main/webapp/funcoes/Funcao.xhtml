@@ -1,0 +1,122 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Cadastro e Manutenção de Funções</ui:define>
+
+	<ui:define name="corpo">
+		<f:metadata>
+	        <f:viewAction action="#{funcaoBean.consultar}" />
+	    </f:metadata>
+	
+		<h:form id="frmFuncao">
+			<h1>Cadastro e Manutenção de Funções</h1>
+
+			<p:messages id="messages" closable="true"/>
+			
+			<p:toolbar style="margin-top: 20px" id="toolbar">
+				<p:toolbarGroup>
+					
+					<p:commandButton value="Nova" icon="ui-icon-document" oncomplete="PF('edicaoFuncaoDialog').show()"
+						action="#{funcaoBean.prepararNovoCadastro()}" process="@this" update="funcao-dialog">
+						<p:resetInput target="funcao-dialog" />
+					</p:commandButton>
+					<p:separator/>
+                    
+                    <p:commandButton icon="ui-icon-pencil" title="Editar" disabled="#{funcaoBean.funcaoSelecionada == null}"
+                    	process="@this" update="funcao-dialog" oncomplete="PF('edicaoFuncaoDialog').show()">
+                    	<p:resetInput target="funcao-dialog" />
+                    	<f:setPropertyActionListener value="#{funcaoBean.funcaoSelecionada}" target="#{funcaoBean.funcao}" />	
+                    </p:commandButton>	
+                    
+                    <p:commandButton icon="ui-icon-trash" title="Excluir" disabled="#{funcaoBean.funcaoSelecionada == null}" 
+                    	process="@this" update="tblFuncao messages toolbar" action="#{funcaoBean.excluir()}">
+                    	<p:confirm icon="ui-icon-aler" header="Confirmação de exclusão" 
+                    		message="Tem certeza que deseja excluir a funcao?"/>
+                    </p:commandButton>	
+                      
+                    <p:commandButton icon="ui-icon-arrowthick-1-s" title="Exportar para XLS" ajax="false" immediate="true">
+                    	<p:dataExporter type="xls" target="tblFuncao" fileName="lista-lotações" />
+                    </p:commandButton>
+					
+					 <p:commandButton value="Emitir" action="#{funcaoBean.emitir()}" ajax="false" />
+                    
+				</p:toolbarGroup>
+			</p:toolbar>
+
+			<p:dataTable id="tblFuncao" style="margin-top: 5px" emptyMessage="Nenhuma função encontrada." rows="20"
+				paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				value="#{funcaoBean.funcoesFiltradas}" var="funcao" selection="#{funcaoBean.funcaoSelecionada}" 
+				selectionMode="single" rowKey="#{funcao.codigo}">
+			
+				<p:ajax event="rowSelect" update=":frmFuncao:toolbar" />
+  			    <p:ajax event="rowUnselect" update=":frmFuncao:toolbar" />
+				
+		        <f:facet name="header">
+		            Lista de Funções cadastradas
+		        </f:facet>
+		        
+				<p:column headerText="Código" width="100" sortBy="#{funcao.codigo}">
+					<p:outputLabel value="#{funcao.codigo}"/>
+				</p:column>
+				
+				<p:column headerText="Função" sortBy="#{funcao.nome}">
+					<p:outputLabel value="#{funcao.nome}"/>
+				</p:column>
+				
+				<p:column headerText="Salário Base" width="100">
+					<p:outputLabel value="#{funcao.salarioBase}">
+						<f:convertNumber type="currency"/>
+					</p:outputLabel>
+				</p:column>				
+
+				<p:column headerText="Status" width="100" sortBy="#{funcao.status.descricao}">
+					<p:outputLabel value="#{funcao.status.descricao}"/>
+				</p:column>				
+
+			</p:dataTable>
+
+			<p:dialog header="Nova lotação" widgetVar="edicaoFuncaoDialog"	id="funcao-dialog" resizable="false" 
+				modal="true" closeOnEscape="true">
+				<p:defaultCommand target="salvar-button" scope="funcao-dialog" />
+				
+				<p:messages id="msgs" />
+				
+				<p:panelGrid columns="2" id="painel-dialog" columnClasses="rotulo, campo" style="width: 100%; margin-top: 5px">
+				
+					<p:outputLabel value="Código" for="codigo"/>
+					<p:inputText id="codigo" size="15" readonly="true"  value="#{funcaoBean.funcao.codigo}"/>
+
+					<p:outputLabel value="Função" for="nomeFuncao"/>
+					<p:inputText id="nomeFuncao" size="60" maxlength="120"  value="#{funcaoBean.funcao.nome}"/>
+
+					<p:outputLabel value="Salário Base" for="salarioBase"/>
+					<p:inputText id="salarioBase" size="20" maxlength="20"  value="#{funcaoBean.funcao.salarioBase}"/>
+					
+					<p:outputLabel value="Status" for="tipo" />
+                	<p:selectOneMenu id="tipo" 	value="#{funcaoBean.funcao.status}">
+						<f:selectItem itemLabel="Selecione..." />
+						<f:selectItems value="#{funcaoBean.statuss}"
+							var="tipo" itemLabel="#{tipo.descricao}" itemValue="#{tipo}" />
+					</p:selectOneMenu>
+						
+				</p:panelGrid>
+				
+				<p:separator/>
+				<h:panelGrid id="pnlBotoes" columns="1">
+					<h:panelGroup>
+						<p:commandButton value="Salvar" icon="ui-icon-disk" id="salvar-button" process="funcao-dialog" action="#{funcaoBean.salvar()}"
+							update="msgs painel-dialog" oncomplete="if (!args.validationFailed) PF('edicaoFuncaoDialog').hide()"/>
+						<p:spacer/>
+						<p:spacer/>		
+						<p:commandButton value="Fechar" icon="ui-icon-close" onclick="PF('edicaoFuncaoDialog').hide()"/>
+					</h:panelGroup>
+				</h:panelGrid>
+			</p:dialog>
+			
+		</h:form>
+	</ui:define>
+</ui:composition>

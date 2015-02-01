@@ -1,0 +1,88 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Consulta Funcionário</ui:define>
+
+	<ui:define name="corpo">
+
+		<h:form id="frmPesquisa">
+			<h1>Consulta Funcionário</h1>
+			<p:messages id="messages" autoUpdate="true" closable="true"/>
+
+			<p:toolbar style="margin-top: 20px">
+				<p:toolbarGroup>
+					<p:commandButton value="Pesquisar" icon="ui-icon-search" action="#{consultaFuncionarioBean.consultar()}"	update="@form"/>
+				</p:toolbarGroup>
+
+				<p:toolbarGroup align="right">
+					<p:button value="Novo" id="botaoNovo" icon="ui-icon-circle-plus" outcome="/funcionarios/CadastroFuncionario"/>
+				</p:toolbarGroup>
+			</p:toolbar>
+			
+			<p:panelGrid columns="2" id="painel" style="width: 100%; margin-top: 20px" columnClasses="rotulo, campo">
+				<p:outputLabel value="Nome/Razão Social" for="nomeRazaoSocial"/>
+				<p:inputText id="nomeRazaoSocial" size="70" maxlength="50" value="#{consultaFuncionarioBean.filtro.nome}"/>
+				
+				<p:outputLabel value="Cnpj" for="cnpj"/>
+				<p:inputText id="cnpj" size="20" maxlength="20" value="#{consultaFuncionarioBean.filtro.cpf}"/>
+				
+				<p:outputLabel value="Inscrição Estadual" for="inscricaoEstadual"/>
+				<p:inputText id="inscricaoEstadual" size="20" maxlength="20" value="#{consultaFuncionarioBean.filtro.rg}"/>		
+				
+				<p:outputLabel value="Situação" />
+   				<p:selectManyCheckbox value="#{consultaFuncionarioBean.filtro.statusFuncionarios}">
+   					 <f:selectItems value="#{consultaFuncionarioBean.statussFuncionario}" var="status"
+   						 itemValue="#{status}" itemLabel="#{status.descricao}" />
+   			 	</p:selectManyCheckbox>		
+			</p:panelGrid>			
+
+			<p:dataTable id="tblFuncionario" style="margin-top: 20px" emptyMessage="Nenhum funcionário encontrado." 
+				rows="20" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				value="#{consultaFuncionarioBean.funcionariosFiltrados}" var="funcionario">
+
+				<p:column headerText="Código"	style="text-align: center; width: 100px">
+					<h:outputText value="#{funcionario.codigo}"/>
+				</p:column>
+				
+				<p:column headerText="Nome do funcionário">
+					<h:outputText value="#{funcionario.nome}"/>
+				</p:column>
+
+				<p:column headerText="Cnpj"	style="text-align: center; width: 150px">
+					<h:outputText value="#{funcionario.documentoReceitaFederal}"/>
+				</p:column>
+
+				<p:column headerText="Inscrição Estadual" style="text-align: center; width: 150px">
+					<h:outputText value="#{funcionario.registroEstadual}"/>
+				</p:column>
+				
+				<p:column headerText="Função"	style="text-align: center; width: 150px">
+					<h:outputText value="#{funcionario.funcao.nome}"/>
+				</p:column>
+
+				<p:column headerText="Situação"	style="text-align: center; width: 150px">
+					<h:outputText value="#{funcionario.statusFuncionario.descricao}"/>
+				</p:column>
+
+				<p:column style="width: 100px; text-align: center">
+					<p:button outcome="CadastroFuncionario" icon="ui-icon-pencil" title="Editar">
+						<f:param name="funcionario" value="#{funcionario.codigo}" />
+					</p:button>
+					
+					<p:commandButton icon="ui-icon-trash" title="Excluir" process="@this" update="tblFuncionario"
+						action="#{consultaFuncionarioBean.excluir()}" >
+						<p:confirm icon="ui-icon-aler" header="Confirmação de exclusão" 
+                    		message="Tem certeza que deseja excluir o funcionário selecionado?"/>
+                    	<f:setPropertyActionListener target="#{consultaFuncionarioBean.funcionarioSelecionado}" value="#{funcionario}" />
+					</p:commandButton>	
+				</p:column>
+
+			</p:dataTable>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

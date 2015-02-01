@@ -1,0 +1,136 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Cadastro e Manutenção de Usuários</ui:define>
+
+	<ui:define name="corpo">
+		<f:metadata>
+	        <f:viewAction action="#{usuarioBean.consultar}" />
+	    </f:metadata>
+	
+		<h:form id="frmUsuario">
+			<h1>Cadastro e Manutenção de Usuários</h1>
+
+			<p:messages id="messages" closable="true"/>
+			
+			<p:toolbar style="margin-top: 20px" id="toolbar">
+				<p:toolbarGroup>
+					
+					<p:commandButton value="Inserir" icon="ui-icon-document" oncomplete="PF('edicaoUsuarioDialog').show()"
+						action="#{usuarioBean.prepararNovoCadastro()}" process="@this" update="usuario-dialog">
+						<p:resetInput target="usuario-dialog" />
+					</p:commandButton>
+					<p:separator/>
+                    
+                    <p:commandButton icon="ui-icon-pencil" title="Editar" disabled="#{usuarioBean.usuarioSelecionado == null}"
+                    	process="@this" update="usuario-dialog" oncomplete="PF('edicaoUsuarioDialog').show()">
+                    	<p:resetInput target="usuario-dialog" />
+                    	<f:setPropertyActionListener value="#{usuarioBean.usuarioSelecionado}" target="#{usuarioBean.usuario}" />	
+                    </p:commandButton>	
+                    
+                    <p:commandButton icon="ui-icon-trash" title="Excluir" disabled="#{usuarioBean.usuarioSelecionado == null}" 
+                    	process="@this" update="tblUsuario messages toolbar" action="#{usuarioBean.excluir()}">
+                    	<p:confirm icon="ui-icon-aler" header="Confirmação de exclusão" 
+                    		message="Tem certeza que deseja excluir a usuario?"/>
+                    </p:commandButton>	
+                      
+                    <p:commandButton icon="ui-icon-arrowthick-1-s" title="Exportar para XLS" ajax="false" immediate="true">
+                    	<p:dataExporter type="xls" target="tblUsuario" fileName="lista-usuários" />
+                    </p:commandButton>
+					
+				</p:toolbarGroup>
+			</p:toolbar>
+
+			<p:dataTable id="tblUsuario" style="margin-top: 5px" emptyMessage="Nenhuma lotação encontrada." rows="20"
+				paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				value="#{usuarioBean.usuariosFiltrados}" var="usuario" selection="#{usuarioBean.usuarioSelecionado}" 
+				selectionMode="single" rowKey="#{usuario.codigo}">
+			
+				<p:ajax event="rowSelect" update=":frmUsuario:toolbar" />
+  			    <p:ajax event="rowUnselect" update=":frmUsuario:toolbar" />
+				
+		        <f:facet name="header">
+		            Lista de Usuários cadastradas
+		        </f:facet>
+		        
+				<p:column headerText="Código" width="100" sortBy="#{usuario.codigo}">
+					<p:outputLabel value="#{usuario.codigo}"/>
+				</p:column>
+				
+				<p:column headerText="Funcionário" sortBy="#{usuario.funcionario.nome}">
+					<p:outputLabel value="#{usuario.funcionario.nome}"/>
+				</p:column>
+				
+				<p:column headerText="Usuário" width="250" sortBy="#{usuario.usuario}">
+					<p:outputLabel value="#{usuario.usuario}"/>
+				</p:column>
+				
+				<p:column headerText="Grupo" width="200" sortBy="#{usuario.grupo.nome}">
+					<p:outputLabel value="#{usuario.grupo.nome}"/>
+				</p:column>	
+				
+				<p:column headerText="Status" width="100" sortBy="#{usuario.status.descricao}">
+					<p:outputLabel value="#{usuario.status.descricao}"/>
+				</p:column>				
+
+			</p:dataTable>
+
+			<p:dialog header="Nova lotação" widgetVar="edicaoUsuarioDialog"	id="usuario-dialog" resizable="false" 
+				modal="true" closeOnEscape="true">
+				<p:defaultCommand target="salvar-button" scope="usuario-dialog" />
+				
+				<p:messages id="msgs" />
+				
+				<p:panelGrid columns="2" id="painel-dialog" columnClasses="rotulo, campo" style="width: 100%; margin-top: 5px">
+				
+					<p:outputLabel value="Código" for="codigo"/>
+					<p:inputText id="codigo" size="15" readonly="true"  value="#{usuarioBean.usuario.codigo}"/>
+
+					<p:outputLabel value="Funcionário" for="funcionario" />
+                	<p:selectOneMenu id="funcionario" value="#{usuarioBean.usuario.funcionario}" converter="funcionarioConverter">
+						<f:selectItem itemLabel="Selecione..." />
+						<f:selectItems value="#{usuarioBean.funcionarios}"
+							var="func" itemLabel="#{func.nome}" itemValue="#{func}" />
+					</p:selectOneMenu>
+
+					<p:outputLabel value="Grupo" for="grupo" />
+                	<p:selectOneMenu id="grupo" value="#{usuarioBean.usuario.grupo}">
+						<f:selectItem itemLabel="Selecione..." />
+						<f:selectItems value="#{usuarioBean.grupos}"
+							var="grup" itemLabel="#{grup.nome}" itemValue="#{grup}" />
+					</p:selectOneMenu>
+
+					<p:outputLabel value="Nome" for="nomeUsuario"/>
+					<p:inputText id="nomeUsuario" size="60" maxlength="120"  value="#{usuarioBean.usuario.usuario}"/>
+
+					<p:outputLabel value="Senha" for="senha"/>
+					<p:inputText id="senha" size="60" maxlength="120"  value="#{usuarioBean.usuario.senha}"/>
+					
+					<p:outputLabel value="Status" for="tipo" />
+                	<p:selectOneMenu id="tipo" 	value="#{usuarioBean.usuario.status}">
+						<f:selectItem itemLabel="Selecione..." />
+						<f:selectItems value="#{usuarioBean.statuss}"
+							var="tipo" itemLabel="#{tipo.descricao}" itemValue="#{tipo}" />
+					</p:selectOneMenu>
+						
+				</p:panelGrid>
+				
+				<p:separator/>
+				<h:panelGrid id="pnlBotoes" columns="1">
+					<h:panelGroup>
+						<p:commandButton value="Salvar" icon="ui-icon-disk" id="salvar-button" process="usuario-dialog" action="#{usuarioBean.salvar()}"
+							update="msgs painel-dialog" oncomplete="if (!args.validationFailed) PF('edicaoUsuarioDialog').hide()"/>
+						<p:spacer/>
+						<p:spacer/>		
+						<p:commandButton value="Fechar" icon="ui-icon-close" onclick="PF('edicaoUsuarioDialog').hide()"/>
+					</h:panelGroup>
+				</h:panelGrid>
+			</p:dialog>
+			
+		</h:form>
+	</ui:define>
+</ui:composition>

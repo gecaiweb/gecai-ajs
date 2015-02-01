@@ -1,0 +1,111 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Cadastro e Manutenção de Lotações</ui:define>
+
+	<ui:define name="corpo">
+		<f:metadata>
+	        <f:viewAction action="#{lotacaoBean.consultar}" />
+	    </f:metadata>
+	
+		<h:form id="frmLotacao">
+			<h1>Cadastro e Manutenção de Lotações</h1>
+
+			<p:messages id="messages" closable="true"/>
+			
+			<p:toolbar style="margin-top: 20px" id="toolbar">
+				<p:toolbarGroup>
+					
+					<p:commandButton value="Inserir" icon="ui-icon-document" oncomplete="PF('edicaoLotacaoDialog').show()"
+						action="#{lotacaoBean.prepararNovoCadastro()}" process="@this" update="lotacao-dialog">
+						<p:resetInput target="lotacao-dialog" />
+					</p:commandButton>
+					<p:separator/>
+                    
+                    <p:commandButton icon="ui-icon-pencil" title="Editar" disabled="#{lotacaoBean.lotacaoSelecionada == null}"
+                    	process="@this" update="lotacao-dialog" oncomplete="PF('edicaoLotacaoDialog').show()">
+                    	<p:resetInput target="lotacao-dialog" />
+                    	<f:setPropertyActionListener value="#{lotacaoBean.lotacaoSelecionada}" target="#{lotacaoBean.lotacao}" />	
+                    </p:commandButton>	
+                    
+                    <p:commandButton icon="ui-icon-trash" title="Excluir" disabled="#{lotacaoBean.lotacaoSelecionada == null}" 
+                    	process="@this" update="tblLotacao messages toolbar" action="#{lotacaoBean.excluir()}">
+                    	<p:confirm icon="ui-icon-aler" header="Confirmação de exclusão" 
+                    		message="Tem certeza que deseja excluir a lotacao?"/>
+                    </p:commandButton>	
+                      
+                    <p:commandButton icon="ui-icon-arrowthick-1-s" title="Exportar para XLS" ajax="false" immediate="true">
+                    	<p:dataExporter type="xls" target="tblLotacao" fileName="lista-lotações" />
+                    </p:commandButton>
+					
+				</p:toolbarGroup>
+			</p:toolbar>
+
+			<p:dataTable id="tblLotacao" style="margin-top: 5px" emptyMessage="Nenhuma lotação encontrada." rows="20"
+				paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				value="#{lotacaoBean.lotacoesFiltradas}" var="lotacao" selection="#{lotacaoBean.lotacaoSelecionada}" 
+				selectionMode="single" rowKey="#{lotacao.codigo}">
+			
+				<p:ajax event="rowSelect" update=":frmLotacao:toolbar" />
+  			    <p:ajax event="rowUnselect" update=":frmLotacao:toolbar" />
+				
+		        <f:facet name="header">
+		            Lista de Lotações cadastradas
+		        </f:facet>
+		        
+				<p:column headerText="Código" width="100" sortBy="#{lotacao.codigo}">
+					<p:outputLabel value="#{lotacao.codigo}"/>
+				</p:column>
+				
+				<p:column headerText="Lotação" sortBy="#{lotacao.nome}">
+					<p:outputLabel value="#{lotacao.nome}"/>
+				</p:column>
+				
+				<p:column headerText="Status" width="100" sortBy="#{lotacao.status.descricao}">
+					<p:outputLabel value="#{lotacao.status.descricao}"/>
+				</p:column>				
+
+			</p:dataTable>
+
+			<p:dialog header="Nova lotação" widgetVar="edicaoLotacaoDialog"	id="lotacao-dialog" resizable="false" 
+				modal="true" closeOnEscape="true">
+				<p:defaultCommand target="salvar-button" scope="lotacao-dialog" />
+				
+				<p:messages id="msgs" />
+				
+				<p:panelGrid columns="2" id="painel-dialog" columnClasses="rotulo, campo" style="width: 100%; margin-top: 5px">
+				
+					<p:outputLabel value="Código" for="codigo"/>
+					<p:inputText id="codigo" size="15" readonly="true"  value="#{lotacaoBean.lotacao.codigo}"/>
+
+					<p:outputLabel value="Lotação" for="nomeLotacao"/>
+					<p:inputText id="nomeLotacao" size="60" maxlength="120"  value="#{lotacaoBean.lotacao.nome}"/>
+					
+					<p:outputLabel value="Status" for="tipo" />
+                	<p:selectOneMenu id="tipo" 	value="#{lotacaoBean.lotacao.status}">
+						<f:selectItem itemLabel="Selecione..." />
+						<f:selectItems value="#{lotacaoBean.statuss}"
+							var="tipo" itemLabel="#{tipo.descricao}" itemValue="#{tipo}" />
+					</p:selectOneMenu>
+						
+				</p:panelGrid>
+				
+				<p:separator/>
+				<h:panelGrid id="pnlBotoes" columns="1">
+					<h:panelGroup>
+						<p:commandButton value="Salvar" icon="ui-icon-disk" id="salvar-button" process="lotacao-dialog" action="#{lotacaoBean.salvar()}"
+							update="msgs painel-dialog" oncomplete="if (!args.validationFailed) PF('edicaoLotacaoDialog').hide()"/>
+						<p:spacer/>
+						<p:spacer/>		
+						<p:commandButton value="Fechar" icon="ui-icon-close" onclick="PF('edicaoLotacaoDialog').hide()"/>
+					</h:panelGroup>
+				</h:panelGrid>
+			</p:dialog>
+			
+		</h:form>
+	</ui:define>
+</ui:composition>

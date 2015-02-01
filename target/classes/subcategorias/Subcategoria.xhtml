@@ -1,0 +1,143 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Cadastro e Manutenção de Subcategorias</ui:define>
+
+	<ui:define name="corpo">
+		<f:metadata>
+			<f:viewAction action="#{subcategoriaBean.consultar}" />
+		</f:metadata>
+
+		<h:form id="frmSubcategoria">
+			<h1>Cadastro e Manutenção de Subcategorias</h1>
+
+			<p:messages id="messages" closable="true" />
+
+			<p:toolbar style="margin-top: 20px" id="toolbar">
+				<p:toolbarGroup>
+
+					<p:commandButton value="Inserir" icon="ui-icon-document"
+						oncomplete="PF('edicaoSubcategoriaDialog').show()"
+						action="#{subcategoriaBean.prepararNovoCadastro()}"
+						process="@this" update="subcategoria-dialog">
+						<p:resetInput target="subcategoria-dialog" />
+					</p:commandButton>
+					<p:separator />
+
+					<p:commandButton icon="ui-icon-pencil" title="Editar"
+						disabled="#{subcategoriaBean.subcategoriaSelecionada == null}"
+						process="@this" update="subcategoria-dialog"
+						oncomplete="PF('edicaoSubcategoriaDialog').show()">
+						<p:resetInput target="subcategoria-dialog" />
+						<f:setPropertyActionListener
+							value="#{subcategoriaBean.subcategoriaSelecionada}"
+							target="#{subcategoriaBean.subcategoria}" />
+					</p:commandButton>
+
+					<p:commandButton icon="ui-icon-trash" title="Excluir"
+						disabled="#{subcategoriaBean.subcategoriaSelecionada == null}"
+						process="@this" update="tblSubcategoria messages toolbar"
+						action="#{subcategoriaBean.excluir()}">
+						<p:confirm icon="ui-icon-aler" header="Confirmação de exclusão"
+							message="Tem certeza que deseja excluir a subcategoria?" />
+					</p:commandButton>
+
+					<p:commandButton icon="ui-icon-arrowthick-1-s"
+						title="Exportar para XLS" ajax="false" immediate="true">
+						<p:dataExporter type="xls" target="tblSubcategoria"
+							fileName="lista-lotações" />
+					</p:commandButton>
+
+				</p:toolbarGroup>
+			</p:toolbar>
+
+			<p:dataTable id="tblSubcategoria" style="margin-top: 5px"
+				emptyMessage="Nenhuma lotação encontrada." rows="20"
+				paginator="true" paginatorAlwaysVisible="false"
+				paginatorPosition="bottom"
+				value="#{subcategoriaBean.subcategoriasFiltradas}"
+				var="subcategoria"
+				selection="#{subcategoriaBean.subcategoriaSelecionada}"
+				selectionMode="single" rowKey="#{subcategoria.codigo}">
+
+				<p:ajax event="rowSelect" update=":frmSubcategoria:toolbar" />
+				<p:ajax event="rowUnselect" update=":frmSubcategoria:toolbar" />
+
+				<f:facet name="header">
+		            Lista de Lotações cadastradas
+		        </f:facet>
+
+				<p:column headerText="Código" width="100" sortBy="#{subcategoria.codigo}">
+					<p:outputLabel value="#{subcategoria.codigo}" />
+				</p:column>
+
+				<p:column headerText="Lotação" sortBy="#{subcategoria.nome}">
+					<p:outputLabel value="#{subcategoria.nome}" />
+				</p:column>
+
+				<p:column headerText="Status" width="200" sortBy="#{subcategoria.categoria.nome}">
+					<p:outputLabel value="#{subcategoria.categoria.nome}" />
+				</p:column>
+				
+				<p:column headerText="Status" width="100" sortBy="#{subcategoria.status.descricao}">
+					<p:outputLabel value="#{subcategoria.status.descricao}" />
+				</p:column>
+
+			</p:dataTable>
+
+			<p:dialog header="Nova lotação" widgetVar="edicaoSubcategoriaDialog"
+				id="subcategoria-dialog" resizable="false" modal="true"
+				closeOnEscape="true">
+				<p:defaultCommand target="salvar-button" scope="subcategoria-dialog" />
+
+				<p:messages id="msgs" />
+
+				<p:panelGrid columns="2" id="painel-dialog"
+					columnClasses="rotulo, campo" style="width: 100%; margin-top: 5px">
+
+					<p:outputLabel value="Código" for="codigo" />
+					<p:inputText id="codigo" size="15" readonly="true"
+						value="#{subcategoriaBean.subcategoria.codigo}" />
+
+					<p:outputLabel value="Categoria" for="categoria" />
+					<p:selectOneMenu id="categoria" value="#{subcategoriaBean.subcategoria.categoria}">
+						<f:selectItem itemLabel="Selecione..." />
+						<f:selectItems value="#{subcategoriaBean.categorias}" var="categ"
+							itemLabel="#{categ.nome}" itemValue="#{categ}" />
+					</p:selectOneMenu>
+
+					<p:outputLabel value="Lotação" for="nomeSubcategoria" />
+					<p:inputText id="nomeSubcategoria" size="60" maxlength="120"
+						value="#{subcategoriaBean.subcategoria.nome}" />
+
+					<p:outputLabel value="Status" for="tipo" />
+					<p:selectOneMenu id="tipo" value="#{subcategoriaBean.subcategoria.status}">
+						<f:selectItem itemLabel="Selecione..." />
+						<f:selectItems value="#{subcategoriaBean.statuss}" var="tipo"
+							itemLabel="#{tipo.descricao}" itemValue="#{tipo}" />
+					</p:selectOneMenu>
+
+				</p:panelGrid>
+
+				<p:separator />
+				<h:panelGrid id="pnlBotoes" columns="1">
+					<h:panelGroup>
+						<p:commandButton value="Salvar" icon="ui-icon-disk"
+							id="salvar-button" process="subcategoria-dialog"
+							action="#{subcategoriaBean.salvar()}" update="msgs painel-dialog"
+							oncomplete="if (!args.validationFailed) PF('edicaoSubcategoriaDialog').hide()" />
+						<p:spacer />
+						<p:spacer />
+						<p:commandButton value="Fechar" icon="ui-icon-close"
+							onclick="PF('edicaoSubcategoriaDialog').hide()" />
+					</h:panelGroup>
+				</h:panelGrid>
+			</p:dialog>
+
+		</h:form>
+	</ui:define>
+</ui:composition>
